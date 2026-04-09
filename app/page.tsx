@@ -32,12 +32,20 @@ export default function Home() {
         </div>
 
         {/* Browse All Link */}
-        <Link
-          href="/products"
-          className="block text-center text-blue-600 font-medium hover:underline"
-        >
-          すべての商品を見る →
-        </Link>
+        <div className="flex gap-4">
+          <Link
+            href="/products"
+            className="flex-1 text-center text-blue-600 font-medium hover:underline py-2"
+          >
+            すべての商品を見る →
+          </Link>
+          <Link
+            href="/login"
+            className="flex-1 text-center px-4 py-2 rounded-lg bg-yellow-400 text-gray-900 font-bold hover:bg-yellow-500 transition-colors"
+          >
+            ログイン
+          </Link>
+        </div>
       </div>
     </MainLayout>
   );
