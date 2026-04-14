@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -49,9 +50,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">
       {/* Logo */}
       <div className="mb-10 text-center">
-        <div className="w-28 h-28 bg-green-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-          <span className="text-5xl">🎓</span>
-        </div>
+        <Image src="/logo.png" alt="Unimarket" width={112} height={112} className="rounded-3xl mx-auto mb-4" />
         <h1 className="text-3xl font-bold text-gray-900">Unimarket</h1>
       </div>
 

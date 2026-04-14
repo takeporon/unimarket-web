@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShoppingCart, Bell, User } from 'lucide-react';
 
 export default function TopBar() {
@@ -9,9 +10,7 @@ export default function TopBar() {
       <div className="max-w-screen-lg mx-auto px-4 py-3 flex items-center justify-center relative">
         {/* Logo - Center */}
         <Link href="/home" className="flex items-center">
-          <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-            <span className="text-lg">🎓</span>
-          </div>
+          <Image src="/logo.png" alt="Unimarket" width={40} height={40} className="rounded-xl" />
         </Link>
 
         {/* Right icons - Absolute positioned */}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface SignupForm {
   email: string;
@@ -110,9 +111,7 @@ export default function SignupPage() {
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8">
       {/* Logo */}
       <div className="mb-8 text-center">
-        <div className="w-20 h-20 bg-green-400 rounded-2xl flex items-center justify-center mx-auto mb-3">
-          <span className="text-3xl font-bold text-white">U</span>
-        </div>
+        <Image src="/logo.png" alt="Unimarket" width={80} height={80} className="rounded-2xl mx-auto mb-3" />
         <h1 className="text-2xl font-bold text-gray-900">UniMarket</h1>
         <p className="text-gray-600 text-sm mt-2">新規登録</p>
       </div>
