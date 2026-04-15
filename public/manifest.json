@@ -1,0 +1,22 @@
+{
+  "name": "UniMarket - 学生向けリセールプラットフォーム",
+  "short_name": "UniMarket",
+  "description": "大学生向けの安全なリセールプラットフォーム",
+  "start_url": "/home",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#16a34a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
