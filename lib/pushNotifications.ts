@@ -1,5 +1,21 @@
 export type PushPermissionState = 'granted' | 'denied' | 'default' | 'unsupported';
 
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+
+/**
+ * Base64 URL文字列をUint8Arrayに変換（applicationServerKey用）
+ */
+function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray.buffer as ArrayBuffer;
+}
+
 /**
  * ブラウザがプッシュ通知をサポートしているか確認
  */
@@ -36,6 +52,23 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 }
 
 /**
+ * 購読情報をサーバーに送信
+ */
+async function sendSubscriptionToServer(subscription: PushSubscription): Promise<boolean> {
+  try {
+    const res = await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription }),
+    });
+    return res.ok;
+  } catch (error) {
+    console.error('Failed to send subscription to server:', error);
+    return false;
+  }
+}
+
+/**
  * 通知許可をリクエストしてプッシュ購読を開始
  */
 export async function requestPushPermission(): Promise<{
@@ -60,16 +93,18 @@ export async function requestPushPermission(): Promise<{
   try {
     // 既存の購読があればそれを返す
     let subscription = await registration.pushManager.getSubscription();
-    if (subscription) {
-      return { permission: 'granted', subscription };
+
+    if (!subscription && VAPID_PUBLIC_KEY) {
+      // 新規購読を作成
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
     }
 
-    // 新規購読を作成（バックエンド連携時にVAPID公開鍵を設定）
-    // TODO: バックエンドからVAPID公開鍵を取得して設定
-    // subscription = await registration.pushManager.subscribe({
-    //   userVisibleOnly: true,
-    //   applicationServerKey: '<VAPID_PUBLIC_KEY>',
-    // });
+    if (subscription) {
+      await sendSubscriptionToServer(subscription);
+    }
 
     return { permission: 'granted', subscription };
   } catch (error) {
@@ -88,6 +123,12 @@ export async function unsubscribePush(): Promise<boolean> {
     const registration = await navigator.serviceWorker.ready;
     const subscription = await registration.pushManager.getSubscription();
     if (subscription) {
+      // サーバーからも削除
+      await fetch('/api/push/subscribe', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: subscription.endpoint }),
+      });
       return await subscription.unsubscribe();
     }
     return true;
@@ -98,20 +139,22 @@ export async function unsubscribePush(): Promise<boolean> {
 }
 
 /**
- * テスト用：ローカル通知を表示
+ * テスト用：サーバー経由でプッシュ通知を送信
  */
 export async function sendTestNotification(): Promise<boolean> {
-  if (Notification.permission !== 'granted') return false;
-
   try {
-    const registration = await navigator.serviceWorker.ready;
-    registration.showNotification('UniMarket テスト通知', {
-      body: 'プッシュ通知が正常に設定されました！',
-      icon: '/logo.png',
-      badge: '/logo.png',
-      tag: 'test-notification',
+    const res = await fetch('/api/push/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'UniMarket テスト通知',
+        body: 'プッシュ通知が正常に設定されました！',
+        url: '/notification-settings',
+        tag: 'test-notification',
+      }),
     });
-    return true;
+    const data = await res.json();
+    return data.success && data.sent > 0;
   } catch (error) {
     console.error('Test notification failed:', error);
     return false;
